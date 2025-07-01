@@ -17,6 +17,9 @@
             /* Dark background */
             color: #e2e8f0;
             /* Light text for contrast */
+            /* Subtle background pattern */
+            background-image: radial-gradient(#2d3748 1px, transparent 1px);
+            background-size: 20px 20px;
         }
 
         .dancing-script {
@@ -27,12 +30,30 @@
             min-height: 120px;
             /* Ensure message box has some height */
         }
+
+        /* Animation for the main card */
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .animate-fadeInScale {
+            animation: fadeInScale 0.8s ease-out forwards;
+        }
     </style>
 </head>
 
 <body class="flex items-center justify-center min-h-screen p-4">
-    <div
-        class="bg-gray-800 rounded-xl shadow-2xl p-8 md:p-12 max-w-4xl w-full text-center transform transition-all duration-500 hover:scale-105">
+    <div class="bg-gray-800 rounded-xl shadow-2xl p-8 md:p-12 max-w-4xl w-full text-center
+                transform transition-all duration-500 hover:scale-105
+                border border-gray-700 animate-fadeInScale"> <!-- Added border and animation -->
         <!-- Header Section -->
         <h1 class="text-4xl md:text-6xl font-bold text-pink-400 mb-4 dancing-script">
             Happy Birthday!
@@ -75,22 +96,10 @@
             </div>
         </div>
 
-        <!-- AI Message Generator Section -->
-        <div class="mb-8 p-6 bg-gray-700 rounded-lg shadow-inner">
-            <h3 class="text-xl font-semibold text-blue-300 mb-4">✨ Generate a Personalized Message ✨</h3>
-            <textarea id="messageInput"
-                class="w-full p-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y mb-4 bg-gray-900 text-gray-200 placeholder-gray-400"
-                rows="3"
-                placeholder="Enter keywords or sentiments about Mrs. Akintayo Olubunmi (e.g., 'kind, supportive, loves gardening, great cook')..."></textarea>
-            <button id="generateMessageBtn"
-                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                Generate Message
-            </button>
-            <div id="loadingIndicator" class="mt-4 text-blue-400 font-medium hidden">Generating...</div>
-        </div>
-
         <!-- Message Section -->
-        <p id="birthdayMessage" class="text-lg md:text-xl text-gray-200 leading-relaxed mb-8 message-box">
+        <p id="birthdayMessage"
+            class="text-lg md:text-xl text-gray-200 leading-relaxed mb-8 message-box bg-gradient-to-r from-gray-700 to-gray-700 p-4 rounded-lg shadow-inner">
+            <!-- Added gradient and padding -->
             Wishing you a day filled with immense joy, laughter, and everything that makes you happy. May your year
             ahead be blessed with good health, prosperity, and countless beautiful moments. You are truly appreciated!
         </p>
@@ -103,67 +112,6 @@
             The Akintayo's
         </p>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const generateMessageBtn = document.getElementById('generateMessageBtn');
-            const messageInput = document.getElementById('messageInput');
-            const birthdayMessage = document.getElementById('birthdayMessage');
-            const loadingIndicator = document.getElementById('loadingIndicator');
-
-            // Store the default message to restore if needed (though not explicitly requested, good practice)
-            const defaultMessage = birthdayMessage.textContent;
-
-            generateMessageBtn.addEventListener('click', async () => {
-                const promptText = messageInput.value.trim();
-                if (!promptText) {
-                    birthdayMessage.textContent = "Please enter some keywords to generate a message!";
-                    return;
-                }
-
-                loadingIndicator.classList.remove('hidden');
-                generateMessageBtn.disabled = true; // Disable button during generation
-
-                try {
-                    const chatHistory = [];
-                    chatHistory.push({
-                        role: "user",
-                        parts: [{
-                            text: `Write a heartfelt birthday message for Mrs. Akintayo Olubunmi. Incorporate the following sentiments/keywords: ${promptText}. Make it warm, appreciative, and suitable for a birthday card. Keep it concise, around 4-6 sentences.`
-                        }]
-                    });
-
-                    const payload = { contents: chatHistory };
-                    const apiKey = ""; // Canvas will provide this at runtime
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    const result = await response.json();
-
-                    if (result.candidates && result.candidates.length > 0 &&
-                        result.candidates[0].content && result.candidates[0].content.parts &&
-                        result.candidates[0].content.parts.length > 0) {
-                        const generatedText = result.candidates[0].content.parts[0].text;
-                        birthdayMessage.textContent = generatedText;
-                    } else {
-                        birthdayMessage.textContent = "Failed to generate message. Please try again or refine your input.";
-                        console.error("Gemini API response structure unexpected:", result);
-                    }
-                } catch (error) {
-                    birthdayMessage.textContent = "An error occurred while generating the message. Please check your network connection or try again later.";
-                    console.error("Error calling Gemini API:", error);
-                } finally {
-                    loadingIndicator.classList.add('hidden');
-                    generateMessageBtn.disabled = false; // Re-enable button
-                }
-            });
-        });
-    </script>
 </body>
 
 </html>
